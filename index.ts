@@ -1,17 +1,20 @@
-import { Hono } from 'hono'
-import { logger } from 'hono/logger'
-import api from './routes/index'
-const app = new Hono()
+import { Hono } from "hono";
+import { logger } from "hono/logger";
+import api from "./routes/index";
+import connectDB from "./database/initDB";
 
+const app = new Hono();
 
-const PORT = process.env.PORT
+connectDB();
 
-app.use(logger())
+const PORT = process.env.PORT;
 
-app.get('/', (c) => c.text('Hello Bun!'))
-app.route('/api', api)
+app.use(logger());
+
+app.get("/", (c) => c.text("Hello Bun!"));
+app.route("/api", api);
 
 export default {
-    port: PORT,
-    fetch: app.fetch
-}
+  port: PORT,
+  fetch: app.fetch,
+};

@@ -1,19 +1,59 @@
-import { pgTable, serial, text, pgEnum, timestamp, json } from "drizzle-orm/pg-core";
+import mongoose from "mongoose";
 
-export const priorityEnum = pgEnum('priority', ['Low', 'Medium', 'High', 'Urgent'])
-export const statusEnum = pgEnum('status', ['Open', 'Completed', 'In Progress', 'On Hold', "Duplicate", "Reopened"])
+const { Schema } = mongoose;
 
-export const issues = pgTable('issues', {
-  issue_id: serial('id').primaryKey(),
-  category: text('category'),
-  summary: text('summary'),
-  description: text('description'),
-  priority: priorityEnum('priority'),
-  status: statusEnum('status'),
-  createdAt: timestamp('createdAt'),
-  updatedAt: timestamp('updatedAt'),
-  reporter: json('reporter').default({name: "", email: ""}),
-  asignee: json('asignee').default({name: "", email: ""}),
-  comments: json('comments'),
-  classification_result: json('classification_result')
+const CommentSchema = new Schema({
+  author: { type: String, required: true },
+  timestamp: { type: Date, default: Date.now },
+  text: { type: String, required: true },
 });
+
+const categorySchema = new Schema({
+  tags: {
+    type: [String],
+  },
+  // weights: mongoose.Schema.Types.Mixed,
+});
+
+const IssueSchema = new Schema(
+  {
+    issue_id: { type: String, required: true },
+    // category: categorySchema,
+    category: { type: String },
+    summary: { type: String, required: true },
+    description: { type: String, required: true },
+    priority: {
+      type: String,
+      required: true,
+      enum: ["Low", "Medium", "Normal", "High", "Very High"],
+    },
+    status: {
+      type: String,
+      required: true,
+      enum: [
+        "Open",
+        "Completed",
+        "In Progress",
+        "On Hold",
+        "Duplicate",
+        "Reopened",
+      ],
+    },
+    reporter: {
+      name: { type: String, required: true },
+      email: { type: String, required: true },
+    },
+    assignee: {
+      name: { type: String, required: true },
+      email: { type: String, required: true },
+    },
+    comments: [CommentSchema],
+  },
+  {
+    timestamps: true,
+  }
+);
+
+const Issue = mongoose.model("Issue", IssueSchema);
+
+export default Issue;
